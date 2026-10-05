@@ -67,7 +67,57 @@ def test_get_quote_raises_for_unknown_ticker():
             _get_quote("zzzz")
 
 
-from yahoo_finance_mcp.server import _get_quotes
+from yahoo_finance_mcp.server import _get_quotes, _get_history
+
+
+def test_get_history_returns_bars():
+    history_df = _make_history_df(
+        [
+            {"date": "2026-09-01", "open": 150.0, "high": 152.0, "low": 149.0, "close": 151.0, "volume": 800_000},
+            {"date": "2026-09-02", "open": 151.0, "high": 153.0, "low": 150.5, "close": 152.5, "volume": 900_000},
+        ]
+    )
+    mock_ticker = MagicMock()
+    mock_ticker.history.return_value = history_df
+
+    with patch("yahoo_finance_mcp.server.yf.Ticker", return_value=mock_ticker) as mock_cls:
+        result = _get_history("msft", period="5d", interval="1d")
+
+    mock_cls.assert_called_once_with("msft")
+    mock_ticker.history.assert_called_once_with(period="5d", interval="1d")
+    assert result["ticker"] == "MSFT"
+    assert result["period"] == "5d"
+    assert result["interval"] == "1d"
+    assert result["bars"] == [
+        {
+            "date": history_df.index[0].to_pydatetime().isoformat(),
+            "open": 150.0,
+            "high": 152.0,
+            "low": 149.0,
+            "close": 151.0,
+            "volume": 800_000,
+        },
+        {
+            "date": history_df.index[1].to_pydatetime().isoformat(),
+            "open": 151.0,
+            "high": 153.0,
+            "low": 150.5,
+            "close": 152.5,
+            "volume": 900_000,
+        },
+    ]
+
+
+def test_get_history_raises_for_unknown_ticker():
+    mock_ticker = MagicMock()
+    mock_ticker.history.return_value = pd.DataFrame()
+
+    with patch("yahoo_finance_mcp.server.yf.Ticker", return_value=mock_ticker):
+        with pytest.raises(
+            ValueError,
+            match="No historical data found for ticker 'zzzz' with period='1mo', interval='1d'",
+        ):
+            _get_history("zzzz", period="1mo", interval="1d")
 
 
 def test_get_quotes_reports_per_ticker_errors():

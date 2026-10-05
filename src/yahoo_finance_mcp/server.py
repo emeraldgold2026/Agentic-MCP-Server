@@ -59,6 +59,45 @@ async def get_stock_prices(tickers: list[str]) -> list[dict]:
     return await asyncio.to_thread(_get_quotes, tickers)
 
 
+def _get_history(ticker: str, period: str, interval: str) -> dict:
+    t = yf.Ticker(ticker)
+    hist = t.history(period=period, interval=interval)
+    if hist.empty:
+        raise ValueError(
+            f"No historical data found for ticker '{ticker}' with period='{period}', interval='{interval}'."
+        )
+
+    bars = [
+        {
+            "date": index.to_pydatetime().isoformat(),
+            "open": float(row["Open"]),
+            "high": float(row["High"]),
+            "low": float(row["Low"]),
+            "close": float(row["Close"]),
+            "volume": int(row["Volume"]),
+        }
+        for index, row in hist.iterrows()
+    ]
+
+    return {
+        "ticker": ticker.upper(),
+        "period": period,
+        "interval": interval,
+        "bars": bars,
+    }
+
+
+@mcp.tool()
+async def get_historical_prices(ticker: str, period: str = "1mo", interval: str = "1d") -> dict:
+    """Get historical OHLCV price bars for a stock ticker.
+
+    period and interval are passed straight through to yfinance, e.g.
+    period in 1d,5d,1mo,3mo,6mo,1y,2y,5y,10y,ytd,max and
+    interval in 1m,2m,5m,15m,30m,60m,90m,1h,1d,5d,1wk,1mo,3mo.
+    """
+    return await asyncio.to_thread(_get_history, ticker, period, interval)
+
+
 def main() -> None:
     mcp.run()
 
