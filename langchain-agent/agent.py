@@ -11,8 +11,6 @@ MCP_SERVER_DIR = Path(__file__).resolve().parent.parent
 
 MODEL = "openai:gpt-5.5"
 
-QUESTION = "What's AAPL trading at right now, and how does that compare to MSFT?"
-
 
 async def main() -> None:
     client = MultiServerMCPClient(
@@ -34,11 +32,12 @@ async def main() -> None:
         system_prompt="You are a helpful financial assistant. Use the available tools to answer questions about stock prices.",
     )
 
-    result = await agent.ainvoke({"messages": [{"role": "user", "content": QUESTION}]})
+    ticker = input("Enter a ticker symbol: ").strip()
+    question = f"What's {ticker} trading at right now?"
 
-    print("--- Full message trace ---")
-    for message in result["messages"]:
-        message.pretty_print()
+    result = await agent.ainvoke({"messages": [{"role": "user", "content": question}]})
+
+    print(f"\n{result['messages'][-1].content}")
 
 
 if __name__ == "__main__":
