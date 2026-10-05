@@ -98,6 +98,28 @@ async def get_historical_prices(ticker: str, period: str = "1mo", interval: str 
     return await asyncio.to_thread(_get_history, ticker, period, interval)
 
 
+def _get_company_info(ticker: str) -> dict:
+    t = yf.Ticker(ticker)
+    info = t.info
+    if not info or not info.get("longName"):
+        raise ValueError(f"No company info found for ticker '{ticker}' — check that the symbol is correct.")
+
+    return {
+        "ticker": ticker.upper(),
+        "name": info.get("longName"),
+        "sector": info.get("sector"),
+        "industry": info.get("industry"),
+        "market_cap": info.get("marketCap"),
+        "description": info.get("longBusinessSummary"),
+    }
+
+
+@mcp.tool()
+async def get_company_info(ticker: str) -> dict:
+    """Get basic company info (name, sector, industry, market cap, description) for a stock ticker."""
+    return await asyncio.to_thread(_get_company_info, ticker)
+
+
 def main() -> None:
     mcp.run()
 

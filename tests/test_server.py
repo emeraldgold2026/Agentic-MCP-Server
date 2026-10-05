@@ -146,3 +146,39 @@ def test_get_quotes_reports_per_ticker_errors():
         "ticker": "BAD",
         "error": "No data found for ticker 'BAD' — check that the symbol is correct.",
     }
+
+
+from yahoo_finance_mcp.server import _get_company_info
+
+
+def test_get_company_info_returns_fields():
+    mock_ticker = MagicMock()
+    mock_ticker.info = {
+        "longName": "Apple Inc.",
+        "sector": "Technology",
+        "industry": "Consumer Electronics",
+        "marketCap": 2_800_000_000_000,
+        "longBusinessSummary": "Apple Inc. designs, manufactures, and markets smartphones.",
+    }
+
+    with patch("yahoo_finance_mcp.server.yf.Ticker", return_value=mock_ticker) as mock_cls:
+        result = _get_company_info("aapl")
+
+    mock_cls.assert_called_once_with("aapl")
+    assert result == {
+        "ticker": "AAPL",
+        "name": "Apple Inc.",
+        "sector": "Technology",
+        "industry": "Consumer Electronics",
+        "market_cap": 2_800_000_000_000,
+        "description": "Apple Inc. designs, manufactures, and markets smartphones.",
+    }
+
+
+def test_get_company_info_raises_for_missing_info():
+    mock_ticker = MagicMock()
+    mock_ticker.info = {}
+
+    with patch("yahoo_finance_mcp.server.yf.Ticker", return_value=mock_ticker):
+        with pytest.raises(ValueError, match="No company info found for ticker 'zzzz'"):
+            _get_company_info("zzzz")
