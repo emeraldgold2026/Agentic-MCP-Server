@@ -43,6 +43,22 @@ async def get_stock_price(ticker: str) -> dict:
     return await asyncio.to_thread(_get_quote, ticker)
 
 
+def _get_quotes(tickers: list[str]) -> list[dict]:
+    results = []
+    for ticker in tickers:
+        try:
+            results.append(_get_quote(ticker))
+        except Exception as exc:
+            results.append({"ticker": ticker.upper(), "error": str(exc)})
+    return results
+
+
+@mcp.tool()
+async def get_stock_prices(tickers: list[str]) -> list[dict]:
+    """Get the latest price and daily trading context for multiple stock tickers."""
+    return await asyncio.to_thread(_get_quotes, tickers)
+
+
 def main() -> None:
     mcp.run()
 
