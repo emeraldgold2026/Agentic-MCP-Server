@@ -50,9 +50,12 @@ purpose; not a concern to design around further.
 
 ## Project layout
 
+This repo (`Agentic-MCP-Server`) is otherwise empty, so the project
+lives at the repo root rather than in a nested subdirectory — the tree
+below is rooted at the repo root itself:
+
 ```
-yahoo-finance-mcp/
-  pyproject.toml
+pyproject.toml
   README.md
   src/yahoo_finance_mcp/
     __init__.py
