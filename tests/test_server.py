@@ -1,3 +1,4 @@
+import os
 from unittest.mock import MagicMock, patch
 
 import pandas as pd
@@ -182,3 +183,13 @@ def test_get_company_info_raises_for_missing_info():
     with patch("yahoo_finance_mcp.server.yf.Ticker", return_value=mock_ticker):
         with pytest.raises(ValueError, match="No company info found for ticker 'zzzz'"):
             _get_company_info("zzzz")
+
+
+@pytest.mark.skipif(
+    not os.environ.get("YF_MCP_LIVE_TEST"),
+    reason="hits real Yahoo Finance data; set YF_MCP_LIVE_TEST=1 to run",
+)
+def test_get_quote_live_smoke():
+    result = _get_quote("AAPL")
+    assert result["ticker"] == "AAPL"
+    assert result["price"] > 0
