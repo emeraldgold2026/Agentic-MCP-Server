@@ -12,6 +12,12 @@ library) as four tools: `get_stock_price`, `get_stock_prices`,
 
     uv run yahoo-finance-mcp
 
+## Get a single ticker's price from the command line
+
+    uv run price TICKER
+
+e.g. `uv run price AAPL` prints `AAPL: $173.50 USD`.
+
 ## Run the tests
 
     uv run pytest

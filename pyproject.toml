@@ -10,6 +10,7 @@ dependencies = [
 
 [project.scripts]
 yahoo-finance-mcp = "yahoo_finance_mcp.server:main"
+price = "yahoo_finance_mcp.cli:main"
 
 [dependency-groups]
 dev = [
