@@ -1,4 +1,5 @@
 import asyncio
+from typing import Any
 
 import yfinance as yf
 from mcp.server.fastmcp import FastMCP
@@ -38,7 +39,7 @@ def _get_quote(ticker: str) -> dict:
 
 
 @mcp.tool()
-async def get_stock_price(ticker: str) -> dict:
+async def get_stock_price(ticker: str) -> dict[str, Any]:
     """Get the latest price and daily trading context for a stock ticker."""
     return await asyncio.to_thread(_get_quote, ticker)
 
@@ -88,7 +89,7 @@ def _get_history(ticker: str, period: str, interval: str) -> dict:
 
 
 @mcp.tool()
-async def get_historical_prices(ticker: str, period: str = "1mo", interval: str = "1d") -> dict:
+async def get_historical_prices(ticker: str, period: str = "1mo", interval: str = "1d") -> dict[str, Any]:
     """Get historical OHLCV price bars for a stock ticker.
 
     period and interval are passed straight through to yfinance, e.g.
@@ -115,7 +116,7 @@ def _get_company_info(ticker: str) -> dict:
 
 
 @mcp.tool()
-async def get_company_info(ticker: str) -> dict:
+async def get_company_info(ticker: str) -> dict[str, Any]:
     """Get basic company info (name, sector, industry, market cap, description) for a stock ticker."""
     return await asyncio.to_thread(_get_company_info, ticker)
 

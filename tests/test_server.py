@@ -1,3 +1,4 @@
+import asyncio
 import os
 from unittest.mock import MagicMock, patch
 
@@ -13,6 +14,16 @@ def test_server_is_named_yahoo_finance():
 
 def test_main_is_callable():
     assert callable(main)
+
+
+def test_all_four_tools_are_registered():
+    names = {t.name for t in asyncio.run(mcp.list_tools())}
+    assert names == {
+        "get_stock_price",
+        "get_stock_prices",
+        "get_historical_prices",
+        "get_company_info",
+    }
 
 
 def _make_history_df(rows):
